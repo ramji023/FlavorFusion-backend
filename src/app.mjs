@@ -11,6 +11,8 @@ app.use(express.urlencoded({
     extended: true,
 }))
 
-
+// app.get("/test", (request,response)=>{
+//     response.status(201).send({msg:"server is running now..."});
+// })
 
 export { app };
