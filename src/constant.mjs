@@ -1,0 +1,1 @@
+export const dB_NAME = "FlavorFusion"
