@@ -38,7 +38,7 @@ const userSchema = new Schema({
 // define pre middleware for hashing the password
 userSchema.pre("save", async function (next) {
     //first check the password it is modified or not
-    if (this.isModified("password")) {
+    if (!this.isModified("password")) {
         return next();
     }
 

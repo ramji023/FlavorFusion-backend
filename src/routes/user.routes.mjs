@@ -4,13 +4,13 @@ import { upload } from "../middlewares/multer.middleware.mjs";  //handling files
 
 
 //handling the registeration of the user
-import { registerUser } from "../controller/user.controller.mjs";
+import { loginUser, registerUser } from "../controller/user.controller.mjs";
 router.route("/register").post(
     upload.single("avatar"),
     registerUser
 );
 
-
+router.route("/login").post(loginUser)
 
 
 
