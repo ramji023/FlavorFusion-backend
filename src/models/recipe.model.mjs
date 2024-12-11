@@ -23,7 +23,7 @@ const recipeSchema = new Schema({
         {
             stepNumber: { type: Number, required: true },
             text: { type: String, required: true },
-        }
+        },
     ],
     prepTime: {
         type: String,
