@@ -138,4 +138,47 @@ const loginUser = asyncHandler(async (req, res) => {
 })
 
 
-export { registerUser, loginUser };
+const logoutUser = asyncHandler(async (req, res) => {
+    /*
+    now how can we get user details if user click to logout button ???
+    -----> suppose if user on a logout button it means user already login and token are saved in their cookies
+      and while generating the tokens we handle user details with tokens.
+    so can we get user details from tokens ????
+    ------> yes first we have to apply authenticate middleware so if user login then token should be save into cookies
+    */
+
+    //take user data through cookies
+
+    const user = req.user;
+
+    if (!user) {
+        throw new errorHandler(404, "something is wrong")
+    }
+
+    // if user exist then set refreshToken by 1
+    const existedUser = await User.findByIdAndUpdate(
+        user._id,
+        {
+            $unset: { refreshToken: 1 }
+        }, {
+        new: true
+    })
+    
+    // console.log(user);
+
+    const options = {
+        httpOnly: true,
+        secure: true,
+    }
+
+    return res.status(201)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(
+            new responseHandler(201, {}, "user logout successfully")
+        )
+
+})
+
+
+export { registerUser, loginUser, logoutUser };
