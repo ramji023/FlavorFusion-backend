@@ -4,7 +4,7 @@ import { upload } from "../middlewares/multer.middleware.mjs";  //handling files
 import { verifyUserByToken } from "../middlewares/auth.middleware.mjs";
 
 //handling the registeration of the user
-import { loginUser, logoutUser, registerUser } from "../controller/user.controller.mjs";
+import { loginUser, logoutUser, registerUser,refreshedAccessToken } from "../controller/user.controller.mjs";
 router.route("/register").post(
     upload.single("avatar"),
     registerUser
@@ -18,4 +18,5 @@ router.route("/logout").post(
     logoutUser,
 )
 
+router.route("/refreshed-token").post(refreshedAccessToken);
 export default router;

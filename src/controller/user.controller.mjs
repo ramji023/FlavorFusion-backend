@@ -4,6 +4,7 @@ import { errorHandler } from "../utils/errorHandler.mjs"
 import { responseHandler } from "../utils/reponseHandler.mjs"
 import { validateEmail } from "../constant.mjs"
 import { uploadOnCloudinary } from "../utils/cloudinary.mjs"
+import jwt from "jsonwebtoken"
 
 //define a functions to generate access and refresh token
 const generateAccessAndRefreshToken = async (userId) => {
@@ -163,7 +164,7 @@ const logoutUser = asyncHandler(async (req, res) => {
         }, {
         new: true
     })
-    
+
     // console.log(user);
 
     const options = {
@@ -180,5 +181,55 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 })
 
+const refreshedAccessToken = asyncHandler(async (req, res) => {
+    /*
+    now assume a scenerio if accesstoken is deleted from cookies after some time then how can we generate new access and refresh token for that users
+    */
 
-export { registerUser, loginUser, logoutUser };
+    //take refresh token from cookies
+    const currentRefreshToken = req.cookies.refreshToken;
+    // console.log(currentRefreshToken);
+
+    //check refresh token is present or not
+    if (!currentRefreshToken) {
+        throw new errorHandler(401, " refresh token is expired or used")
+    }
+
+    // if present then decode the refresh token
+    const decodedToken = jwt.verify(currentRefreshToken, process.env.SECRET_REFRESH_TOKEN)
+
+    //now find the user from database 
+    const findUser = await User.findById(decodedToken?._id);
+
+    if (!findUser) {
+        throw new errorHandler(400, "unauthorized token")
+    }
+    //now check current refresh token with the saved refresh token in database
+    if (currentRefreshToken !== findUser.refreshToken) {
+        throw new errorHandler(404, "refresh token is not matched")
+    }
+
+    //now generate the access token and new refresh token
+    const { refreshToken: newrefreshToken, accessToken } = await generateAccessAndRefreshToken(findUser._id);
+
+    // console.log({ newrefreshToken, accessToken })
+    const options = {
+        httpOnly: true,
+        secure: true,
+    }
+
+    return res
+        .status(201)
+        .cookie("refreshToken", newrefreshToken, options)
+        .cookie("accessToken", accessToken, options)
+        .json(
+            new responseHandler(201,
+                {
+                    accessToken,
+                    refreshToken: newrefreshToken,
+                },
+                "refreshed refresh token successfully"
+            )
+        )
+})
+export { registerUser, loginUser, logoutUser, refreshedAccessToken };
