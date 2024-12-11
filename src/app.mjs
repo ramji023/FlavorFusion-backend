@@ -16,10 +16,14 @@ app.use(cookieParser());
 //     response.status(201).send({msg:"server is running now..."});
 // })
 
-import userRouter from "./routes/user.routes.mjs";
+
 import bodyParser from "body-parser";
+//handling user operations
+import userRouter from "./routes/user.routes.mjs";
 app.use("/api/users", userRouter);    // http://localhost:8000/api/users/register
 
-
+//handling recipe operations
+import recipeRouter from "./routes/recipe.routes.mjs";
+app.use("/api/recipe",recipeRouter);
 
 export { app };
