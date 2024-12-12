@@ -8,7 +8,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.mjs"
 const addNewRecipe = asyncHandler(async (req, res) => {
     //take authenticated user data from token
     const user = req.user  //take userId from the token
-    console.log(user._id);
+    // console.log(user._id);
     // get recipe details through req.body
     const { recipeTitle, description, ingredients, instructions, prepTime, cookTime, } = req.body;
 
@@ -92,7 +92,7 @@ const addNewRecipe = asyncHandler(async (req, res) => {
 const getAllRecipe = asyncHandler(async (req, res) => {
     // Fetch all the recipes from the database
     const data = await Recipe.find();
-    console.log(`Number of recipes: ${data.length}`);
+    // console.log(`Number of recipes: ${data.length}`);
 
     // If there are no recipes
     if (data.length === 0) {
@@ -107,5 +107,26 @@ const getAllRecipe = asyncHandler(async (req, res) => {
     );
 });
 
+const getRecipeById = asyncHandler(async (req, res) => {
+    // console.log(req.params)
+    //first check if we get the recipe id from req.params
+    if (!req.params) {
+        throw new errorHandler(404, "Bad request..");
+    }
+    // if get the id then check there is any recipe exist in database with this id or not
+    const { id: recipeId } = req.params;
+    // console.log(recipeId);
+    const existedRecipe = await Recipe.findById(recipeId);
+    // console.log(existedRecipe);
 
-export { addNewRecipe, getAllRecipe };
+    if (!existedRecipe) {
+        throw new errorHandler(401, "there is no recipe in database");
+    }
+
+    //if recipe exist then
+    return res.status(200).json(
+        new responseHandler(200, existedRecipe, "fetch recipe by id successfully")
+    )
+
+})
+export { addNewRecipe, getAllRecipe, getRecipeById };
