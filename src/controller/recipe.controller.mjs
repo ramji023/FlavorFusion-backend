@@ -63,14 +63,14 @@ const addNewRecipe = asyncHandler(async (req, res) => {
     // console.log(typeof (instructions));
     const instruction = JSON.parse(instructions);  // here parse the array otherwise it consider as a string like this "[]"
     // console.log(typeof (instruction));
-
+    const ingredient = JSON.parse(ingredients);
 
 
     //now create the object for recipe model
     const recipeData = await Recipe.create({
         recipeTitle,
         description,
-        ingredients,
+        ingredients:ingredient,
         instructions: instruction,
         prepTime,
         cookTime,
