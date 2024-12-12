@@ -70,7 +70,7 @@ const addNewRecipe = asyncHandler(async (req, res) => {
     const recipeData = await Recipe.create({
         recipeTitle,
         description,
-        ingredients:ingredient,
+        ingredients: ingredient,
         instructions: instruction,
         prepTime,
         cookTime,
@@ -88,5 +88,24 @@ const addNewRecipe = asyncHandler(async (req, res) => {
         )
 })
 
+//now fetch all the recipes
+const getAllRecipe = asyncHandler(async (req, res) => {
+    // Fetch all the recipes from the database
+    const data = await Recipe.find();
+    console.log(`Number of recipes: ${data.length}`);
 
-export { addNewRecipe };
+    // If there are no recipes
+    if (data.length === 0) {
+        return res.status(200).json(
+            new responseHandler(200, [], "There are no recipes available at the moment")
+        );
+    }
+
+    // If recipes are found
+    return res.status(200).json(
+        new responseHandler(200, data, "Fetched all the recipes successfully")
+    );
+});
+
+
+export { addNewRecipe, getAllRecipe };
