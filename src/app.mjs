@@ -34,4 +34,8 @@ app.use("/api/likes", likeRouter);  //  http://localhost:8000/api/likes/like-rec
 import commentRouter from "./routes/comment.routes.mjs"
 app.use("/api/comment",commentRouter);  //  http://localhost:8000/api/comment
 
+
+//handle save recipe operations
+import favRecipeRouter from "./routes/favRecipe.routes.mjs"
+app.use("/api/fav-recipe",favRecipeRouter)   // http://localhost:8000/api/fav-recipe
 export { app };
