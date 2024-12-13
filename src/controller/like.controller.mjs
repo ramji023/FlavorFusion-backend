@@ -1,9 +1,10 @@
+import { Comment } from "../models/comment.model.mjs";
 import { Like } from "../models/like.model.mjs";
 import { Recipe } from "../models/recipe.model.mjs"
 import { asyncHandler } from "../utils/asyncHandler.mjs";
 import { errorHandler } from "../utils/errorHandler.mjs";
 import { responseHandler } from "../utils/reponseHandler.mjs";
-import mongoose , {Schema} from "mongoose"
+import mongoose, { Schema } from "mongoose"
 
 //if user like or dislike any recipe
 const toggleRecipeLike = asyncHandler(async (req, res) => {
@@ -72,7 +73,76 @@ const toggleRecipeLike = asyncHandler(async (req, res) => {
 
 //if user like any comment
 const toggleCommentLike = asyncHandler(async (req, res) => {
-      
+    // console.log(req.params);
+    // console.log(req.query);
+    const userId = req.user._id
+    if (!userId) {
+        throw new errorHandler(404, "unauthorized user");
+    }
+
+
+    //check we get the params and query or not
+    // Validate request parameters and query
+    const { recipeId, commentId } = req.params;
+
+    if (!(recipeId || commentId)) {
+        throw new errorHandler(400, "Recipe ID and Comment ID are required");
+    }
+
+    const { actions } = req.query;
+    if (!actions || !(actions === 'like' || actions === 'dislike')) {
+        throw new errorHandler(401, "can not fetch the actions. please send valid action")
+    }
+
+
+    // now we will check that comment ID exist or not and assosiated with same recipe id
+    const commentData = await Comment.findById(commentId);
+    if (!commentData) {
+        throw new errorHandler(404, "there is no comments in database");
+    }
+
+    // console.log(commentData);
+
+    // if exist then check that wheather this comment assosiate with this recipe id or not
+    // console.log(recipeId);
+    // console.log(commentData.recipeId.toString());
+    if (commentData.recipeId.toString() !== recipeId) {
+        throw new errorHandler(404, "there is something wrong")
+    }
+
+
+    // Check if the user already liked/disliked this comment
+    const existingLike = await Like.findOne(
+        {
+            recipe: recipeId,
+            comment: commentId,
+            likedBy: userId,
+        }
+    )
+
+    // console.log(existingLike);
+    if (existingLike) {
+        existingLike.status = actions
+        await existingLike.save({ validateBeforeSave: false })
+        return res.status(200).json(
+            new responseHandler(200, `Comment ${actions}d successfully`)
+        )
+    } else {
+        await Like.create({
+            recipe: recipeId,
+            comment: commentId,
+            likedBy: userId,
+            status: actions,
+        })
+
+        return res.status(201).json(
+            new responseHandler(201, `Comment ${actions}d successfully`)
+        )
+    }
+
+
+
+
 })
 
 
