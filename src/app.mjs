@@ -24,6 +24,9 @@ app.use("/api/users", userRouter);    // http://localhost:8000/api/users/registe
 
 //handling recipe operations
 import recipeRouter from "./routes/recipe.routes.mjs";
-app.use("/api/recipes",recipeRouter); //http://localhost:8000/api/recipes/
+app.use("/api/recipes", recipeRouter); //http://localhost:8000/api/recipes/
 
+//handling like operations
+import likeRouter from "./routes/like.routes.mjs"
+app.use("/api/likes", likeRouter);  //  http://localhost:8000/api/likes/like-recipe
 export { app };
