@@ -71,34 +71,11 @@ const toggleRecipeLike = asyncHandler(async (req, res) => {
 
 
 //if user like any comment
-const likeCommentByUser = asyncHandler(async (req, res) => {
-    if (!req.user) {
-        throw new errorHandler(404, "anthorized user")
-    }
-    //take the user data from the token
-    const userId = req.user._id;
-    console.log(userId);
-
-    // now check if we dont get comment id or not
-    if (!req.params) {
-        throw new errorHandler(404, "there is issue to get comment id")
-    }
-
-    const { commentId } = req.params;
-
-    console.log(commentId);
-
-    await Like.create({
-        comment: commentId,
-        likedBy: userId,
-    })
-
-    return res.status(201).json(
-        new responseHandler(201, {}, "user liked the comment successfully")
-    )
+const toggleCommentLike = asyncHandler(async (req, res) => {
+      
 })
 
 
 
 
-export { likeCommentByUser, toggleRecipeLike }
+export { toggleCommentLike, toggleRecipeLike }

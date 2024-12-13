@@ -29,4 +29,9 @@ app.use("/api/recipes", recipeRouter); //http://localhost:8000/api/recipes/
 //handling like operations
 import likeRouter from "./routes/like.routes.mjs"
 app.use("/api/likes", likeRouter);  //  http://localhost:8000/api/likes/like-recipe
+
+//handling comments operations
+import commentRouter from "./routes/comment.routes.mjs"
+app.use("/api/comment",commentRouter);  //  http://localhost:8000/api/comment
+
 export { app };
