@@ -12,5 +12,4 @@ const followersSchema = new Schema({
 }, { timestamps: true })
 
 
-const Followers = mongoose.model("Followers", followersSchema)
-export { followersSchema }
+export const Followers = mongoose.model("Followers", followersSchema)

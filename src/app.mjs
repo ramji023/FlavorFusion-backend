@@ -38,4 +38,9 @@ app.use("/api/comment",commentRouter);  //  http://localhost:8000/api/comment
 //handle save recipe operations
 import favRecipeRouter from "./routes/favRecipe.routes.mjs"
 app.use("/api/fav-recipe",favRecipeRouter)   // http://localhost:8000/api/fav-recipe
+
+//handle follow unfollow operations
+import followerRouter from "./routes/followers.routes.mjs"
+app.use("/api/follow-creater",followerRouter)  // http://localhost:8000/api/follow-creater
+
 export { app };
