@@ -107,6 +107,7 @@ const getAllRecipe = asyncHandler(async (req, res) => {
     );
 });
 
+//get a recipe by their id
 const getRecipeById = asyncHandler(async (req, res) => {
     // console.log(req.params)
     //first check if we get the recipe id from req.params
@@ -129,4 +130,9 @@ const getRecipeById = asyncHandler(async (req, res) => {
     )
 
 })
-export { addNewRecipe, getAllRecipe, getRecipeById };
+
+// fetch all the recipe of a user
+const getAllRecipeByCreater = asyncHandler(async (req, res) => {
+    //TODO TASK
+})
+export { addNewRecipe, getAllRecipe, getRecipeById, getAllRecipeByCreater };
