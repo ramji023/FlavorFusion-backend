@@ -3,10 +3,12 @@ const router = Router();
 import { upload } from "../middlewares/multer.middleware.mjs";  //handling files from client side using multer middleware
 import { verifyUserByToken } from "../middlewares/auth.middleware.mjs";
 
+
 //handling the registeration of the user
 import { loginUser, logoutUser, registerUser,refreshedAccessToken } from "../controller/user.controller.mjs";
+import { handleGlobalError } from "../middlewares/error.middleware.mjs";
 router.route("/register").post(
-    upload.single("avatar"),
+    // upload.single("avatar"),
     registerUser
 );
 

@@ -26,14 +26,11 @@ const generateAccessAndRefreshToken = async (userId) => {
 }
 
 const registerUser = asyncHandler(async (req, res) => {
-
-
-    // console.log(req.file);
-    // console.log(req.body);
-    const { username, fullName, email, phoneNumber, password } = req.body;
+    console.log(req.body);
+    const { username, email, password } = req.body;
 
     // first check all fields are mandatory
-    if (!username || !fullName || !email || !phoneNumber || !password) {
+    if (!username || !email || !password) {
         throw new errorHandler(
             401,
             "all fields are required",
@@ -42,7 +39,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // check email validation
     if (!validateEmail(email)) {
-        throw new errorHandler(402, "invlaid email format")
+        throw new errorHandler(401, "invlaid email format")
     }
 
     // check user already exist or not
@@ -51,42 +48,44 @@ const registerUser = asyncHandler(async (req, res) => {
     })
 
     if (existedUser) {
-        throw new errorHandler(409, "user alreayd exist in database.")
+        throw new errorHandler(409, "A user with this email or username already exists.")
     }
-
-    //check avatar existed or not and if exist then find the local path of avatar
-    let avatarLocalPath = ""
-    let avatarUrl = ""
-    if (req.file && req.file.path) {
-        avatarLocalPath = req.file.path;
-
-        const avatar = await uploadOnCloudinary(avatarLocalPath);
-        // console.log(avatar);
-        //now check if we get the avatar url from cloudinary or not
-        if (!avatar) {
-            throw new errorHandler(404, "something is wrong with the cloudinary");
-        }
-        avatarUrl = avatar.url
-    }
-
 
     //now create the user
     const createUser = await User.create(
         {
             username,
             email,
-            fullName,
             password,
-            phoneNumber,
-            avatar: avatarUrl,
         }
     )
 
     if (!createUser) {
         throw new errorHandler(404, "something went wrong");
     }
-    return res.status(201).json(new responseHandler(201, createUser, "user register successfully."));
+
+    //define options
+    const options = {
+        httpOnly: true,
+        secure: true,
+    }
+    //now generate token 
+    const { refreshToken, accessToken } = await generateAccessAndRefreshToken(createUser._id)
+    console.log({ refreshToken, accessToken })
+
+    return res.status(201)
+        .cookie("refreshToken", refreshToken, options)
+        .cookie("accessToken", accessToken, options)
+        .json(new responseHandler(201,
+            {
+                data: createUser,
+                refreshToken,
+                accessToken
+            },
+            "user register successfully."));
 });
+
+
 
 const loginUser = asyncHandler(async (req, res) => {
     // console.log(req.body);
@@ -233,3 +232,21 @@ const refreshedAccessToken = asyncHandler(async (req, res) => {
         )
 })
 export { registerUser, loginUser, logoutUser, refreshedAccessToken };
+
+
+
+
+// //check avatar existed or not and if exist then find the local path of avatar
+// let avatarLocalPath = ""
+// let avatarUrl = ""
+// if (req.file && req.file.path) {
+//     avatarLocalPath = req.file.path;
+
+//     const avatar = await uploadOnCloudinary(avatarLocalPath);
+//     // console.log(avatar);
+//     //now check if we get the avatar url from cloudinary or not
+//     if (!avatar) {
+//         throw new errorHandler(404, "something is wrong with the cloudinary");
+//     }
+//     avatarUrl = avatar.url
+// }
