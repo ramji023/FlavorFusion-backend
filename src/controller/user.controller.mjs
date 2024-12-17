@@ -26,7 +26,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 }
 
 const registerUser = asyncHandler(async (req, res) => {
-    console.log(req.body);
+    // console.log(req.body);
     const { username, email, password } = req.body;
 
     // first check all fields are mandatory
@@ -71,20 +71,19 @@ const registerUser = asyncHandler(async (req, res) => {
     }
     //now generate token 
     const { refreshToken, accessToken } = await generateAccessAndRefreshToken(createUser._id)
-    console.log({ refreshToken, accessToken })
+    // console.log({ refreshToken, accessToken })
 
+    // now check user is successfully saved in database or not
+  const registerUser = await  User.findById(createUser._id).select("-password -refreshToken")
     return res.status(201)
         .cookie("refreshToken", refreshToken, options)
         .cookie("accessToken", accessToken, options)
         .json(new responseHandler(201,
             {
-                data: createUser,
-                refreshToken,
-                accessToken
+                data: registerUser,
             },
             "user register successfully."));
 });
-
 
 
 const loginUser = asyncHandler(async (req, res) => {
