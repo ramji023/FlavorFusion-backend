@@ -100,15 +100,40 @@ const addNewRecipe = asyncHandler(async (req, res) => {
 //now fetch all the recipes
 const getAllRecipe = asyncHandler(async (req, res) => {
     // Fetch all the recipes from the database
-    const data = await Recipe.find();
+    let data = await Recipe.find();
     // console.log(`Number of recipes: ${data.length}`);
-
     // If there are no recipes
     if (data.length === 0) {
         return res.status(200).json(
             new responseHandler(200, [], "There are no recipes available at the moment")
         );
     }
+
+    data = await Recipe.aggregate([
+        {
+            $lookup: {
+                from: "users",  
+                localField: "createdBy", 
+                foreignField: "_id",  
+                as: "userInfo"  
+            }
+        },
+        {
+            $unwind: "$userInfo"  
+        },
+        {
+            $project: {
+                _id: 1,  // Include the recipe ID
+                recipeTitle: 1,  // Include the recipe title
+                "userInfo.username": 1,  // Include the username
+                "userInfo.avatar": 1,  // Include the avatar
+                images: { $arrayElemAt: ["$images", 0] }  // Get the first image from the images array
+            }
+        }
+    ]);
+
+    //  console.log(data);
+
 
     // If recipes are found
     return res.status(200).json(
