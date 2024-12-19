@@ -8,13 +8,14 @@ cloudinary.config({
 });
 
 //now define the function for uploading files on cloudinary from server
-const uploadOnCloudinary = async function (localFilePath) {
+const uploadOnCloudinary = async function (localFilePath, folderPath) {
     try {
         if (!localFilePath) return null;
         const uploadResult = await cloudinary.uploader.upload(
             localFilePath,
             {
                 resource_type: "auto",
+                folder: folderPath,
             }
         )
         // console.log(uploadResult);

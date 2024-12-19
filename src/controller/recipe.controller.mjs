@@ -6,8 +6,14 @@ import { uploadOnCloudinary } from "../utils/cloudinary.mjs"
 
 //define controllers to add the recipe
 const addNewRecipe = asyncHandler(async (req, res) => {
+    // console.log(req.user)
+    // console.log(req.body)
+    // console.log(req.files);
     //take authenticated user data from token
     const user = req.user  //take userId from the token
+    if (!user) {
+        throw new errorHandler(404, "user is unauthorized");
+    }
     // console.log(user._id);
     // get recipe details through req.body
     const { recipeTitle, description, ingredients, instructions, prepTime, cookTime, } = req.body;
@@ -34,12 +40,14 @@ const addNewRecipe = asyncHandler(async (req, res) => {
     const imagesUrl = [];
     let videoUrl = "";
 
+
+
     if (req.files) {
         if (req.files["images"]) {
             // now iterate through the "images" array and upload on cloudinary
             for (const file of req.files["images"]) {
                 // upload it on cloudinary
-                const imageUploadResult = await uploadOnCloudinary(file.path);
+                const imageUploadResult = await uploadOnCloudinary(file.path, "Flavor-Fusion/recipe/images");
 
                 if (!imageUploadResult) {
                     throw new errorHandler(404, "something is wrong while getting images url form cloudinary")
@@ -50,7 +58,7 @@ const addNewRecipe = asyncHandler(async (req, res) => {
         }
         if (req.files["recipeVideo"][0]) {
             //upload video on cloudinary
-            const videoUploadResult = await uploadOnCloudinary(req.files["recipeVideo"][0].path);
+            const videoUploadResult = await uploadOnCloudinary(req.files["recipeVideo"][0].path, "Flavor-Fusion/recipe/videos");
             //check we get the url form cloudinary or not
             if (!videoUploadResult) {
                 throw new errorHandler(404, "something is wrong while getting video url form cloudinary")
@@ -60,6 +68,7 @@ const addNewRecipe = asyncHandler(async (req, res) => {
     }
 
     // console.log(instructions);
+    // console.log(typeof (ingredients));
     // console.log(typeof (instructions));
     const instruction = JSON.parse(instructions);  // here parse the array otherwise it consider as a string like this "[]"
     // console.log(typeof (instruction));
