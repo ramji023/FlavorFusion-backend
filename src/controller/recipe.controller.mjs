@@ -99,6 +99,10 @@ const addNewRecipe = asyncHandler(async (req, res) => {
 
 //now fetch all the recipes
 const getAllRecipe = asyncHandler(async (req, res) => {
+    console.log(req.user);
+    if (!req.user) {
+        throw new errorHandler(404, "unauthorized user send bad request to fetch recipe from server")
+    }
     // Fetch all the recipes from the database
     let data = await Recipe.find();
     // console.log(`Number of recipes: ${data.length}`);
@@ -112,14 +116,14 @@ const getAllRecipe = asyncHandler(async (req, res) => {
     data = await Recipe.aggregate([
         {
             $lookup: {
-                from: "users",  
-                localField: "createdBy", 
-                foreignField: "_id",  
-                as: "userInfo"  
+                from: "users",
+                localField: "createdBy",
+                foreignField: "_id",
+                as: "userInfo"
             }
         },
         {
-            $unwind: "$userInfo"  
+            $unwind: "$userInfo"
         },
         {
             $project: {

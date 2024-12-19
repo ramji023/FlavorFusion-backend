@@ -18,7 +18,7 @@ router.route("/add-recipe").post(
     ]),
     addNewRecipe)
 
-router.route("/get-recipe").get(getAllRecipe);
+router.route("/get-recipe").get(verifyUserByToken, getAllRecipe);
 
 router.route("/get-recipe/:id").get(getRecipeById);
 
