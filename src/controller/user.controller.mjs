@@ -74,7 +74,7 @@ const registerUser = asyncHandler(async (req, res) => {
     // console.log({ refreshToken, accessToken })
 
     // now check user is successfully saved in database or not
-  const registerUser = await  User.findById(createUser._id).select("-password -refreshToken")
+    const registerUser = await User.findById(createUser._id).select("-password -refreshToken")
     return res.status(201)
         .cookie("refreshToken", refreshToken, options)
         .cookie("accessToken", accessToken, options)
@@ -136,6 +136,17 @@ const loginUser = asyncHandler(async (req, res) => {
         )
 })
 
+
+const currentUserData = asyncHandler(async (req, res) => {
+    if (!req.user) {
+        throw new errorHandler(401, "user is invalid")
+    }
+    const user = req.user
+
+    res.status(201).json(
+        new responseHandler(201, user, "this user is now on application")
+    )
+})
 
 const logoutUser = asyncHandler(async (req, res) => {
     /*
@@ -228,7 +239,7 @@ const refreshedAccessToken = asyncHandler(async (req, res) => {
             )
         )
 })
-export { registerUser, loginUser, logoutUser, refreshedAccessToken };
+export { registerUser, loginUser, logoutUser, refreshedAccessToken ,currentUserData};
 
 
 

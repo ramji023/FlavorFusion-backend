@@ -5,7 +5,7 @@ import { verifyUserByToken } from "../middlewares/auth.middleware.mjs";
 
 
 //handling the registeration of the user
-import { loginUser, logoutUser, registerUser,refreshedAccessToken } from "../controller/user.controller.mjs";
+import { loginUser, logoutUser, registerUser,refreshedAccessToken ,currentUserData} from "../controller/user.controller.mjs";
 import { handleGlobalError } from "../middlewares/error.middleware.mjs";
 router.route("/register").post(
     // upload.single("avatar"),
@@ -14,6 +14,7 @@ router.route("/register").post(
 
 router.route("/login").post(loginUser)
 
+router.route("/current-user").post(verifyUserByToken,currentUserData);
 //secured route 
 router.route("/logout").post(
     verifyUserByToken,
