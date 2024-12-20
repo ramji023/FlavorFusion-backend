@@ -200,11 +200,11 @@ const refreshedAccessToken = asyncHandler(async (req, res) => {
     const findUser = await User.findById(decodedToken?._id);
 
     if (!findUser) {
-        throw new errorHandler(400, "unauthorized token")
+        throw new errorHandler(401, "unauthorized token")
     }
     //now check current refresh token with the saved refresh token in database
     if (currentRefreshToken !== findUser.refreshToken) {
-        throw new errorHandler(404, "refresh token is not matched")
+        throw new errorHandler(401, "refresh token is not matched")
     }
 
     //now generate the access token and new refresh token
@@ -223,8 +223,6 @@ const refreshedAccessToken = asyncHandler(async (req, res) => {
         .json(
             new responseHandler(201,
                 {
-                    accessToken,
-                    refreshToken: newrefreshToken,
                 },
                 "refreshed refresh token successfully"
             )
