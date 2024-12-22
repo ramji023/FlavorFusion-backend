@@ -161,7 +161,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     //take user data through cookies
 
     const user = req.user;
-
+    console.log("logout user : ", user);
     if (!user) {
         throw new errorHandler(404, "something is wrong")
     }
