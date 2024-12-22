@@ -87,21 +87,22 @@ const registerUser = asyncHandler(async (req, res) => {
 
 
 const loginUser = asyncHandler(async (req, res) => {
-    // console.log(req.body);
+    console.log(req.body);
     //take the user details through req.body
-    const { phoneNumber, email, password } = req.body;
+    const { email, password } = req.body;
     //if both phone number or email filed are undefined
-    if (!phoneNumber && !email) {
-        throw new errorHandler(401, "phone number or email is required")
+    if (!email && !password) {
+        throw new errorHandler(401, "email and password is required")
     }
     // now run a mongoose query to find that user is present or not
     const existedUser = await User.findOne({
-        $or: [{ phoneNumber }, { email }]
+        $or: [{ email }]
     })
     // console.log(existedUser);
     if (!existedUser) {
         throw new errorHandler(401, "user is not present in database");
     }
+    console.log("user exist : ", existedUser);
     //now if user is present then check password
     const checkPassword = await existedUser.isPasswordMatch(password);
     if (!checkPassword) {
@@ -113,7 +114,7 @@ const loginUser = asyncHandler(async (req, res) => {
     // console.log({ accessToken, refreshToken });
     //find the data of logged in user
     const loggedUser = await User.findById(existedUser._id).select("-password -refreshToken");
-
+    console.log("logged in user  : ", loggedUser);
     // console.log(loggedUser);
     //define the options;
     const options = {
@@ -129,7 +130,7 @@ const loginUser = asyncHandler(async (req, res) => {
             new responseHandler(
                 201,
                 {
-                    existedUser: loggedUser, accessToken, refreshToken
+                    existedUser: loggedUser
                 },
                 "user logged in successfully"
             )
@@ -239,7 +240,7 @@ const refreshedAccessToken = asyncHandler(async (req, res) => {
             )
         )
 })
-export { registerUser, loginUser, logoutUser, refreshedAccessToken ,currentUserData};
+export { registerUser, loginUser, logoutUser, refreshedAccessToken, currentUserData };
 
 
 
