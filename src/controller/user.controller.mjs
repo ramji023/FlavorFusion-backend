@@ -137,7 +137,6 @@ const loginUser = asyncHandler(async (req, res) => {
         )
 })
 
-
 const currentUserData = asyncHandler(async (req, res) => {
     if (!req.user) {
         throw new errorHandler(401, "user is invalid")
@@ -149,6 +148,65 @@ const currentUserData = asyncHandler(async (req, res) => {
     )
 })
 
+const uploadAvatar = asyncHandler(async (req, res) => {
+    const user = req.user
+    if (!user) {
+        throw new errorHandler(401, "user is not authorized")
+    }
+
+    // if user is present then
+    const existedUser = await User.findById(user._id)
+
+    if (!existedUser) {
+        throw new errorHandler(401, "user is not present in database")
+    }
+
+    // if user present then
+    console.log(req.file)
+    const file = req.file;
+
+    if (!file) {
+        throw new errorHandler(404, "avatar is required")
+    }
+
+    //if file and file path is present then
+    let avatarUrl = ""
+    if (file && file.path) {
+
+        const avatarResult = await uploadOnCloudinary(file.path, "/Flavor-Fusion/users/avatar");
+        if (!avatarResult.url) {
+            throw new errorHandler(505, "something is wrong to getting url from cloudinary")
+        }
+        avatarUrl = avatarResult.url
+    }
+    console.log(avatarUrl);
+    existedUser.avatar = avatarUrl
+    try {
+        await existedUser.save({ validateBeforeSave: false });
+        return res.status(201).json(
+            new responseHandler(201, {avatarUrl}, "avatar uploaded successfully")
+        )
+    } catch (error) {
+        throw new errorHandler(404, "something is wrong while saving avatar in database")
+    }
+
+
+
+})
+const getAccountDetails = asyncHandler(async (req, res) => {
+    const user = req.user
+    if (!user) {
+        throw new errorHandler(401, "unauthorized user")
+    }
+
+    //if user present 
+    console.log("user account details : ", user);
+
+    res.status(201).json(
+        new responseHandler(201, user, "account details fetch successfully")
+    )
+
+})
 const logoutUser = asyncHandler(async (req, res) => {
     /*
     now how can we get user details if user click to logout button ???
@@ -240,7 +298,7 @@ const refreshedAccessToken = asyncHandler(async (req, res) => {
             )
         )
 })
-export { registerUser, loginUser, logoutUser, refreshedAccessToken, currentUserData };
+export { registerUser, loginUser, logoutUser, refreshedAccessToken, currentUserData, getAccountDetails, uploadAvatar };
 
 
 
