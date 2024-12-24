@@ -45,4 +45,53 @@ const createComment = asyncHandler(async (req, res) => {
     )
 })
 
-export { createComment }
+const getCommentByRecipeId = asyncHandler(async (req, res) => {
+    const { recipeId } = req.params;
+    //if user did not get recipe Id
+    if (!recipeId) {
+        throw new errorHandler(404, "did not got recipe id")
+    }
+
+    //define a pipeline to fetch all comments on a specific recipe
+    const pipeline = [
+        {
+            $match: {
+                // recipeId: ObjectId('6763d64f9cd1aed3d5aff4ce')
+                recipeId: new mongoose.Types.ObjectId(recipeId)
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "createdBy",
+                foreignField: "_id",
+                as: "creatorData"
+            }
+        },
+        {
+            $project: {
+                content: 1,
+                creatorName: { $arrayElemAt: ["$creatorData.username", 0] }
+            }
+        }
+    ]
+
+    try {
+        const allComments = await Comment.aggregate(pipeline);
+
+        if (allComments.length === 0) {
+            return res.status(200).json(
+                new responseHandler(200, allComments, "There are no comments on this recipe")
+            );
+        }
+
+        return res.status(200).json(
+            new responseHandler(200, allComments, "All comments fetched successfully")
+        );
+    } catch (error) {
+        console.error("Error fetching comments:", error);
+        throw new errorHandler(500, "Failed to fetch comments");
+    }
+})
+
+export { createComment, getCommentByRecipeId }
