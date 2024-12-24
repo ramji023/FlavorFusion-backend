@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.mjs"
 import { errorHandler } from "../utils/errorHandler.mjs"
 import { responseHandler } from "../utils/reponseHandler.mjs"
 import { uploadOnCloudinary } from "../utils/cloudinary.mjs"
+import mongoose from "mongoose";
 
 //define controllers to add the recipe
 const addNewRecipe = asyncHandler(async (req, res) => {
@@ -155,16 +156,56 @@ const getRecipeById = asyncHandler(async (req, res) => {
     // if get the id then check there is any recipe exist in database with this id or not
     const { id: recipeId } = req.params;
     // console.log(recipeId);
-    const existedRecipe = await Recipe.findById(recipeId);
-    // console.log(existedRecipe);
+    //apply a aggregation pipeline for fetching all recipe Data with likes,comments and creator data
+    const pipeline = [
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(recipeId),
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "createdBy",
+                foreignField: "_id",
+                as: "creatorResult"
+            }
+        },
+        {
+            $lookup: {
+                from: "likes",
+                localField: "_id",
+                foreignField: "recipe",
+                as: "likedByUsers"
+            }
+        },
+        {
+            $project: {
+                _id: 1,
+                recipeTitle: 1,
+                recipeVideo: 1,
+                description: 1,
+                ingredients: 1,
+                instructions: 1,
+                prepTime: 1,
+                cookTime: 1,
+                images: 1,
+                creatorName: { $arrayElemAt: ["$creatorResult.username", 0] },
+                likesCount: { $size: "$likedByUsers" },
+            }
+        }
+    ];
+    const existedRecipe = await Recipe.aggregate(pipeline);
 
-    if (!existedRecipe) {
+
+    console.log("existed Recipe Data : ", existedRecipe)
+    if (!existedRecipe || existedRecipe.length === 0) {
         throw new errorHandler(401, "there is no recipe in database");
     }
 
     //if recipe exist then
     return res.status(200).json(
-        new responseHandler(200, existedRecipe, "fetch recipe by id successfully")
+        new responseHandler(200, existedRecipe[0], "fetch recipe by id successfully")
     )
 
 })
