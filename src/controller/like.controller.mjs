@@ -145,7 +145,25 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
 
 })
 
+const getLikedRecipeByLoggedinUser = asyncHandler(async (req, res) => {
+    const user = req.user
+    if (!user) {
+        throw new errorHandler(401, "unauthorized user")
+    }
+
+    const pipeline = [{
+        $match: {
+            likedBy:new mongoose.Types.ObjectId(user._id)
+        }
+    }]
+
+    const likedRecipes = await Like.aggregate(pipeline)
+    console.log(likedRecipes);
+
+    return res.status(200).json(
+        new responseHandler(200, likedRecipes, "get all the recipe like by loggedin user")
+    )
+})
 
 
-
-export { toggleCommentLike, toggleRecipeLike }
+export { toggleCommentLike, toggleRecipeLike, getLikedRecipeByLoggedinUser }
