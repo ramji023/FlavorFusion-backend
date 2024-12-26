@@ -63,11 +63,12 @@ const toggleRecipeLike = asyncHandler(async (req, res) => {
             likedBy: userId,
             status: action,
         })
+        return res.status(201).json(
+            new responseHandler(201, {}, "user liked or disliked successfully")
+        )
     }
 
-    return res.status(201).json(
-        new responseHandler(201, {}, "user liked or disliked successfully")
-    )
+
 })
 
 
@@ -153,7 +154,8 @@ const getLikedRecipeByLoggedinUser = asyncHandler(async (req, res) => {
 
     const pipeline = [{
         $match: {
-            likedBy:new mongoose.Types.ObjectId(user._id)
+            likedBy: new mongoose.Types.ObjectId(user._id),
+            status : "like"
         }
     }]
 
