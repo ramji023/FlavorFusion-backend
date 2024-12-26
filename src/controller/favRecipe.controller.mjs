@@ -37,6 +37,10 @@ const clickFavRecipe = asyncHandler(async (req, res) => {
         throw new errorHandler(400, "Invalid save query parameter");
     }
 
+    console.log(userId)
+    console.log(recipeId)
+    console.log(saveStatus)
+
     // if exist then check if user mark favourite or not
     const existedFavRecipe = await FavRecipe.findOne({
         recipeId,
@@ -63,4 +67,36 @@ const clickFavRecipe = asyncHandler(async (req, res) => {
     }
 })
 
-export { clickFavRecipe }
+const getAllSavedRecipeByUser = asyncHandler(async (req, res) => {
+    const user = req.user
+    if (!user) {
+        throw new errorHandler(401, "unauthorized user..")
+    }
+
+    //if user exist then
+    const pipeline = [
+        {
+            $match: {
+                savedBy: new mongoose.Types.ObjectId(user._id),
+                saveStatus: true
+            }
+        }
+    ]
+    try {
+        const allSavedRecipeByUser = await FavRecipe.aggregate(pipeline)
+        if (allSavedRecipeByUser.length === 0 || allSavedRecipeByUser) {
+            return res.status(200).json(
+                new responseHandler(200, allSavedRecipeByUser, "all saved recipe fetch successfully..")
+            )
+        }
+    } catch (err) {
+        console.log(err)
+        throw new errorHandler(404, "something is wrong while fetching saved recipe by user")
+    }
+
+
+})
+
+
+
+export { clickFavRecipe, getAllSavedRecipeByUser }
